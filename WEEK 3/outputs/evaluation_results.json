@@ -1,0 +1,28 @@
+{
+    "baseline_accuracy": 0.9736842105263158,
+    "baseline_test_f1": 0.9629629629629629,
+    "baseline_cv_mean_f1": 0.9497623484530383,
+    "baseline_cv_std_f1": 0.03803989666280064,
+    "tuned_accuracy": 0.9649122807017544,
+    "tuned_precision": 0.975,
+    "tuned_recall": 0.9285714285714286,
+    "tuned_f1": 0.9512195121951219,
+    "tuned_cv_f1": 0.9592013212343892,
+    "roc_auc": 0.9970238095238095,
+    "best_parameters": {
+        "classifier__max_depth": null,
+        "classifier__min_samples_leaf": 2,
+        "classifier__min_samples_split": 5,
+        "classifier__n_estimators": 100
+    },
+    "confusion_matrix": [
+        [
+            71,
+            1
+        ],
+        [
+            3,
+            39
+        ]
+    ]
+}
