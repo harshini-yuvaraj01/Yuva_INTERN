@@ -1,0 +1,486 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Clarity | ML Prediction</title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #080b12;
+            color: white;
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            padding: 35px 15px;
+        }
+
+        .container {
+            max-width: 1050px;
+            margin: auto;
+        }
+
+        header {
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            font-size: 25px;
+            font-weight: bold;
+            color: #22d3ee;
+        }
+
+        .hero {
+            margin-bottom: 30px;
+        }
+
+        .hero h1 {
+            font-size: 42px;
+            margin: 15px 0;
+        }
+
+        .hero span {
+            color: #a78bfa;
+        }
+
+        .hero p {
+            color: #9ca3af;
+            line-height: 1.7;
+        }
+
+        .card {
+            background: linear-gradient(
+                145deg,
+                #182033,
+                #101522
+            );
+
+            border: 1px solid #334155;
+            border-radius: 18px;
+            padding: 30px;
+        }
+
+        .card h2 {
+            margin-bottom: 12px;
+        }
+
+        .description {
+            color: #9ca3af;
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+
+        .fields {
+            display: grid;
+            grid-template-columns:
+                repeat(auto-fit, minmax(220px, 1fr));
+            gap: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #cbd5e1;
+            font-size: 13px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            background: #080e19;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            color: white;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #8b5cf6;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        button {
+            padding: 13px 22px;
+            border: none;
+            border-radius: 9px;
+            background: linear-gradient(
+                100deg,
+                #7c3aed,
+                #0891b2
+            );
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: wait;
+        }
+
+        .reset {
+            background: #263244;
+        }
+
+        #result {
+            display: none;
+            margin-top: 25px;
+            padding: 22px;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            background: #080e19;
+        }
+
+        #result.show {
+            display: block;
+        }
+
+        .prediction {
+            font-size: 27px;
+            font-weight: bold;
+            color: #22d3ee;
+            margin: 15px 0;
+        }
+
+        .meter {
+            height: 10px;
+            background: #334155;
+            border-radius: 10px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+
+        .meter div {
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                #8b5cf6,
+                #22d3ee
+            );
+        }
+
+        .disclaimer {
+            color: #94a3b8;
+            font-size: 12px;
+            line-height: 1.6;
+            margin-top: 20px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 35px;
+            color: #64748b;
+        }
+
+        @media(max-width: 600px) {
+
+            .hero h1 {
+                font-size: 30px;
+            }
+
+            .card {
+                padding: 18px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <header>
+            <div class="logo">CLARITY.</div>
+        </header>
+
+        <section class="hero">
+
+            <p>WEEK 4 | FINAL ML CAPSTONE</p>
+
+            <h1>
+                Machine Learning<br>
+                Made <span>Simple.</span>
+            </h1>
+
+            <p>
+                An interactive Breast Cancer Classification
+                application powered by Scikit-learn and FastAPI.
+            </p>
+
+        </section>
+
+
+        <section class="card">
+
+            <h2>Enter Feature Measurements</h2>
+
+            <p class="description" id="status">
+                Loading model features...
+            </p>
+
+            <form id="prediction-form">
+
+                <div class="fields" id="fields"></div>
+
+                <div class="buttons">
+
+                    <button type="submit" id="predict-btn" disabled>
+                        Run Prediction →
+                    </button>
+
+                    <button
+                        type="button"
+                        class="reset"
+                        id="reset-btn">
+                        Reset
+                    </button>
+
+                </div>
+
+            </form>
+
+            <div id="result"></div>
+
+            <p class="disclaimer">
+                Educational demonstration only.
+                This application is not a medically validated
+                diagnostic tool.
+            </p>
+
+        </section>
+
+
+        <footer>
+            Built with Python | FastAPI | Scikit-learn | Joblib
+        </footer>
+
+    </div>
+
+
+    <script>
+
+        const form = document.getElementById(
+            "prediction-form"
+        );
+
+        const fields = document.getElementById("fields");
+
+        const result = document.getElementById("result");
+
+        const predictBtn = document.getElementById(
+            "predict-btn"
+        );
+
+        let defaults = {};
+
+
+        // Format feature names
+        function formatName(name) {
+
+            return name
+                .replaceAll("_", " ")
+                .replace(/\b\w/g, c => c.toUpperCase());
+
+        }
+
+
+        // Load features from API
+        async function loadFeatures() {
+
+            try {
+
+                const response = await fetch("/features");
+
+                if (!response.ok) {
+                    throw new Error("Unable to load features");
+                }
+
+                const data = await response.json();
+
+                defaults = data.defaults;
+
+                data.feature_names.forEach((name, index) => {
+
+                    const wrapper = document.createElement("div");
+
+                    const label = document.createElement("label");
+
+                    label.textContent = formatName(name);
+
+                    const input = document.createElement("input");
+
+                    input.type = "number";
+                    input.step = "any";
+                    input.required = true;
+
+                    input.name = name;
+                    input.id = "feature-" + index;
+
+                    input.value = defaults[name];
+
+                    label.htmlFor = input.id;
+
+                    wrapper.appendChild(label);
+                    wrapper.appendChild(input);
+
+                    fields.appendChild(wrapper);
+
+                });
+
+                document.getElementById("status").textContent =
+                    "30 model features loaded successfully.";
+
+                predictBtn.disabled = false;
+
+            }
+
+            catch (error) {
+
+                document.getElementById("status").textContent =
+                    error.message;
+
+            }
+
+        }
+
+
+        // Submit prediction
+        form.addEventListener("submit", async function(event) {
+
+            event.preventDefault();
+
+            predictBtn.disabled = true;
+            predictBtn.textContent = "Predicting...";
+
+            const features = {};
+
+            new FormData(form).forEach((value, key) => {
+
+                features[key] = Number(value);
+
+            });
+
+            try {
+
+                const response = await fetch("/predict", {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        features: features
+                    })
+
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        typeof data.detail === "string"
+                            ? data.detail
+                            : data.detail?.message || "Prediction failed"
+                    );
+
+                }
+
+                result.className = "show";
+
+                result.innerHTML = `
+
+                    <h2>Prediction Result</h2>
+
+                    <div class="prediction">
+                        ${data.prediction.toUpperCase()}
+                    </div>
+
+                    <p>
+                        Confidence:
+                        <strong>${data.confidence_percent}%</strong>
+                    </p>
+
+                    <div class="meter">
+                        <div style="width:${data.confidence_percent}%">
+                        </div>
+                    </div>
+
+                    <p>
+                        Class Probabilities:
+                        ${Object.entries(data.class_probabilities)
+                            .map(([name, value]) =>
+                                `${formatName(name)}: ${(value * 100).toFixed(2)}%`
+                            )
+                            .join(" | ")}
+                    </p>
+
+                    <p class="disclaimer">
+                        ${data.message}
+                    </p>
+
+                `;
+
+            }
+
+            catch (error) {
+
+                result.className = "show";
+
+                result.textContent = "Error: " + error.message;
+
+            }
+
+            finally {
+
+                predictBtn.disabled = false;
+
+                predictBtn.textContent = "Run Prediction →";
+
+            }
+
+        });
+
+
+        // Reset fields
+        document.getElementById("reset-btn")
+            .addEventListener("click", function() {
+
+                form.querySelectorAll("input").forEach(input => {
+
+                    input.value = defaults[input.name];
+
+                });
+
+                result.className = "";
+                result.innerHTML = "";
+
+            });
+
+
+        loadFeatures();
+
+    </script>
+
+</body>
+
+</html>
